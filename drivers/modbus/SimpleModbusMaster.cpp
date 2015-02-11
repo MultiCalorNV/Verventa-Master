@@ -260,22 +260,17 @@ void waiting_for_reply()
 		
 	if(__HAL_UART_GET_FLAG(&UartHandle, UART_FLAG_RXNE) != RESET){
 		std::printf("RX not empty...\n");
-
-		if(HAL_UART_Receive_DMA(&UartHandle, (uint8_t *)aRxBuffer_Usart, 20) != HAL_OK){
-			printf("USART Receive Error\n");
-		}
-		/*else{
-			//state = IDLE;
-			for(buffer = 0; buffer < 22; buffer++){
-				frame[buffer] = aRxBuffer_Usart[buffer];
-				std::printf("ReceiveBuffer: %d\n", frame[buffer]);
-			}
-		}*/
 	}
-	else if(UartReady != RESET){
+
+	// Modbus ADU from slave overhead[1]:id [2]:function code [3]:n-data [n-1][n]:crc
+	if(HAL_UART_Receive_DMA(&UartHandle, (uint8_t *)aRxBuffer_Usart, (packet->data * 2)+5) != HAL_OK){
+		printf("USART Receive Error\n");
+	}
+
+	if(UartReady != RESET){
 		for(buffer = 0; buffer < 12; buffer++){
 			frame[buffer] = aRxBuffer_Usart[buffer];
-			std::printf("ReceiveBuffer: %d\n", frame[buffer]);
+			std::printf("ReceiveBuffer[%d]: %d\n", buffer, frame[buffer]);
 		}
 		UartReady = RESET;
 
@@ -547,13 +542,13 @@ static void sendPacket(uint8_t bufferSize){
 		
 	for (uint8_t i = 0; i < bufferSize; i++){
 		aTxBuffer_Usart[i] = frame[i];
-		/*std::printf("Transmitbuffer: %d\n", frame[i]);*/
+		/*std::printf("Transmitbuffer[%d]: %d\n", i, frame[i]);*/
 	}
 	
 	// It may be necessary to add a another character delay T1_5 here to
 	// avoid truncating the message on slow and long distance connections
 	
-	if(HAL_UART_Transmit_DMA(&UartHandle, (uint8_t*)aTxBuffer_Usart, 8)!= HAL_OK){
+	if(HAL_UART_Transmit_DMA(&UartHandle, (uint8_t*)aTxBuffer_Usart, bufferSize)!= HAL_OK){
 		printf("USART Transmit Error\n");
 	}
 		
