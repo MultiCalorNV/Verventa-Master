@@ -57,13 +57,17 @@
 void modbus_Setup(){
 	uint32_t baud = 115200;
 	uint16_t polling = 0;
-	uint16_t timeout = 1000;
+	uint16_t timeout = 800;
 	uint8_t retry_count = 0;
 	
 	// read 2 registers starting at address 0
-	modbus_construct(packet1, 20, READ_HOLDING_REGISTERS, 0, 1, regs);
+	modbus_construct(packet1, 20, READ_HOLDING_REGISTERS, 0, 2, regs);
 	// read the 10 registers to the PLC starting at address 2
 	modbus_construct(packet2, 20, READ_HOLDING_REGISTERS, 0, 2, regs);
+	//
+	modbus_construct(packet3, 20, READ_HOLDING_REGISTERS, 0, 2, regs);
+	//
+	modbus_construct(packet4, 20, READ_HOLDING_REGISTERS, 0, 2, regs);
 	
 	modbus_configure(baud, timeout, polling, retry_count, packets, TOTAL_NO_OF_PACKETS);
 	

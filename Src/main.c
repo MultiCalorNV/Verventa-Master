@@ -157,10 +157,15 @@ int main(void){
 				
 	//	test_Cplusplus();
 		
+		if(modBus_Update == true){
+			modbus_update();
+
+			modBus_Update = false;
+		}
+
 		if(gui_Exec == true){
 			WM_InvalidateWindow(hWinFanImg);
 			GUI_Exec();
-			//modbus_update();
 			
 			/*Clear Flag*/
 			gui_Exec = false;
@@ -168,7 +173,7 @@ int main(void){
 		
 		if(Touch_Flagged == true){
 			UB_STemWIN_updateTouch();
-			modbus_update();
+			//modbus_update();
 
 			Touch_Flagged = false;
 		}

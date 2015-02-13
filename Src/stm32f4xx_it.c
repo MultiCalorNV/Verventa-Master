@@ -54,6 +54,7 @@
 /* Exported variables ---------------------------------------------------------*/
 bool gui_Exec = false;
 bool Touch_Flagged = false;
+bool modBus_Update = false;
 /* Private variables ---------------------------------------------------------*/
 static volatile uint32_t touch_timer=0;
 static volatile uint32_t msec_counter = 0;
@@ -208,6 +209,14 @@ void SysTick_Handler(void)
 			break;
 	}
 
+	switch(msec_counter % 500){
+		case 0:
+			modBus_Update = true;
+			break;
+		default:
+			break;
+	}
+
 	//---------------------------
 	// Touch-Timer
 	//---------------------------
@@ -235,20 +244,20 @@ void SysTick_Handler(void)
   * @param  None
   * @retval None   
   */
-void USARTx_DMA_RX_IRQHandler(void)
+/*void USARTx_DMA_RX_IRQHandler(void)
 {
   HAL_DMA_IRQHandler(UartHandle.hdmarx);
-}
+}*/
 
 /**
   * @brief  This function handles DMA TX interrupt request.
   * @param  None
   * @retval None   
   */
-void USARTx_DMA_TX_IRQHandler(void)
+/*void USARTx_DMA_TX_IRQHandler(void)
 {
   HAL_DMA_IRQHandler(UartHandle.hdmatx);
-}
+}*/
 
 /**
   * @brief  This function handles USARTx interrupt request.
@@ -257,7 +266,9 @@ void USARTx_DMA_TX_IRQHandler(void)
   */
 void USARTx_IRQHandler(void)
 {
+
   HAL_UART_IRQHandler(&UartHandle);
+
 }
 /**
   * @brief  This function handles PPP interrupt request.

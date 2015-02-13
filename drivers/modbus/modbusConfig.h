@@ -63,6 +63,8 @@
 enum{
 	PACKET1, 
 	PACKET2, 
+	PACKET3,
+	PACKET4,
 	// more packets
 	TOTAL_NO_OF_PACKETS
 };
@@ -72,6 +74,8 @@ Packet packets[TOTAL_NO_OF_PACKETS];
 // Create the packet pointer to every packet in array
 packetPointer packet1 = &packets[PACKET1];
 packetPointer packet2 = &packets[PACKET2];
+packetPointer packet3 = &packets[PACKET3];
+packetPointer packet4 = &packets[PACKET4];
 // The data from the PLC will be stored in the regs array
 uint16_t regs[200];
 /*	exported functions------------------------------*/

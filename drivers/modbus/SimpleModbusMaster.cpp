@@ -46,7 +46,7 @@
 #define WAITING_FOR_REPLY 2
 #define WAITING_FOR_TURNAROUND 3
 
-#define BUFFER_SIZE 256
+#define BUFFER_SIZE 1024
 
 extern UART_HandleTypeDef UartHandle;
 
@@ -68,7 +68,9 @@ packetPointer packet; // current packet
 uint8_t aTxBuffer_Usart[BUFFER_SIZE];
 uint8_t aRxBuffer_Usart[RXBUFFERSIZEUSART];
 
-__IO ITStatus UartReady = RESET;
+__IO ITStatus UartReady_Transmit = RESET;
+__IO ITStatus UartReady_Receive = RESET;
+
 
 /* Private Functions -----------------------------------------------------*/
 static void idle();
@@ -262,22 +264,18 @@ void waiting_for_reply()
 		std::printf("RX not empty...\n");
 	}
 
-	// Modbus ADU from slave overhead[1]:id [2]:function code [3]:n-data [n-1][n]:crc
-	if(HAL_UART_Receive_DMA(&UartHandle, (uint8_t *)aRxBuffer_Usart, (packet->data * 2)+5) != HAL_OK){
-		printf("USART Receive Error\n");
-	}
-
-	if(UartReady != RESET){
-		for(buffer = 0; buffer < 12; buffer++){
+	if(UartReady_Receive != RESET){
+		for(buffer = 0; buffer < (packet->data * 2) + 5; buffer++){
 			frame[buffer] = aRxBuffer_Usart[buffer];
 			std::printf("ReceiveBuffer[%d]: %d\n", buffer, frame[buffer]);
 		}
-		UartReady = RESET;
+		UartReady_Receive = RESET;
 
 		if(frame[0] = packet->id){
 			processReply();
 		}
 	}
+
 	// The minimum buffer size from a slave can be an exception response of
 	// 5 bytes. If the buffer was partially filled set a frame_error.
 	// The maximum number of bytes in a modbus packet is 256 bytes.
@@ -391,6 +389,7 @@ void process_F3_F4()
     {
       // start at the 4th element in the frame and combine the Lo byte 
       packet->register_array[i] = (frame[index] << 8) | frame[index + 1]; 
+      std::printf("Reg[%d]: %#04x\n", i, packet->register_array[i]);
       index += 2;
     }
     processSuccess(); 
@@ -540,23 +539,31 @@ static uint16_t calculateCRC(uint8_t bufferSize){
 static void sendPacket(uint8_t bufferSize){
 	//digitalWrite(TxEnablePin, HIGH);
 		
-	for (uint8_t i = 0; i < bufferSize; i++){
-		aTxBuffer_Usart[i] = frame[i];
-		/*std::printf("Transmitbuffer[%d]: %d\n", i, frame[i]);*/
-	}
-	
 	// It may be necessary to add a another character delay T1_5 here to
 	// avoid truncating the message on slow and long distance connections
-	
-	if(HAL_UART_Transmit_DMA(&UartHandle, (uint8_t*)aTxBuffer_Usart, bufferSize)!= HAL_OK){
-		printf("USART Transmit Error\n");
+
+	if(HAL_UART_Transmit_IT(&UartHandle, (uint8_t*)aTxBuffer_Usart, bufferSize)!= HAL_OK){
+		std::printf("USART Transmit Error\n");
+	}
+
+	for (uint8_t i = 0; i < bufferSize; i++){
+		aTxBuffer_Usart[i] = frame[i];
+		std::printf("Transmitbuffer[%d]: %d\n", i, frame[i]);
 	}
 		
-/*	while (UartReady != SET){
+	/*while(UartReady_Transmit != SET){
 		std::printf("Waiting on bus free!\n");
 	}*/
 		
-	UartReady = RESET;
+	UartReady_Transmit = RESET;
+
+	if(HAL_UART_Receive_IT(&UartHandle, (uint8_t *)aRxBuffer_Usart, (packet->data * 2) + 5) != HAL_OK){
+		std::printf("USART Receive Error\n");
+	}
+
+	/*while(UartReady_Receive != SET){
+		std::printf("Bussy receiving");
+	}*/
 	
 	//digitalWrite(TxEnablePin, LOW);
 		
@@ -572,7 +579,7 @@ static void sendPacket(uint8_t bufferSize){
   */
 void HAL_UART_TxCpltCallback(UART_HandleTypeDef *UartHandle){
   /* Set transmission flag: transfer complete */
-  UartReady = SET;
+  UartReady_Transmit = SET;
   
 }
 
@@ -585,7 +592,7 @@ void HAL_UART_TxCpltCallback(UART_HandleTypeDef *UartHandle){
   */
 void HAL_UART_RxCpltCallback(UART_HandleTypeDef *UartHandle){
   /* Set transmission flag: transfer complete */
-  UartReady = SET;
+  UartReady_Receive = SET;
   
 }
 
@@ -598,5 +605,6 @@ void HAL_UART_RxCpltCallback(UART_HandleTypeDef *UartHandle){
   */
 void HAL_UART_ErrorCallback(UART_HandleTypeDef *UartHandle){
   /* Transfer error in reception/transmission process */
-  printf("USART bus Error"); 
+	std::printf("USART bus Error\n"); 
+	std::printf("Uart Error Code: %d\n", UartHandle->ErrorCode);
 }

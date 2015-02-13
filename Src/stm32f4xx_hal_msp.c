@@ -80,8 +80,8 @@
   */
 void HAL_UART_MspInit(UART_HandleTypeDef *huart)
 {
-  static DMA_HandleTypeDef hdma_tx;
-  static DMA_HandleTypeDef hdma_rx;
+  //static DMA_HandleTypeDef hdma_tx;
+  //static DMA_HandleTypeDef hdma_rx;
   
   GPIO_InitTypeDef  GPIO_InitStruct;
   
@@ -92,7 +92,7 @@ void HAL_UART_MspInit(UART_HandleTypeDef *huart)
   /* Enable USART2 clock */
   USARTx_CLK_ENABLE(); 
   /* Enable DMA1 clock */
-  DMAx_CLK_ENABLE();   
+  //DMAx_CLK_ENABLE();   
   
   /*##-2- Configure peripheral GPIO ##########################################*/  
   /* UART TX GPIO pin configuration  */
@@ -112,7 +112,7 @@ void HAL_UART_MspInit(UART_HandleTypeDef *huart)
     
   /*##-3- Configure the DMA streams ##########################################*/
   /* Configure the DMA handler for Transmission process */
-  hdma_tx.Instance                 = USARTx_TX_DMA_STREAM;
+  /*hdma_tx.Instance                 = USARTx_TX_DMA_STREAM;
   
   hdma_tx.Init.Channel             = USARTx_TX_DMA_CHANNEL;
   hdma_tx.Init.Direction           = DMA_MEMORY_TO_PERIPH;
@@ -127,13 +127,13 @@ void HAL_UART_MspInit(UART_HandleTypeDef *huart)
   hdma_tx.Init.MemBurst            = DMA_MBURST_INC4;
   hdma_tx.Init.PeriphBurst         = DMA_PBURST_INC4;
   
-  HAL_DMA_Init(&hdma_tx);   
+  HAL_DMA_Init(&hdma_tx);*/ 
   
   /* Associate the initialized DMA handle to the the UART handle */
-  __HAL_LINKDMA(huart, hdmatx, hdma_tx);
+  //__HAL_LINKDMA(huart, hdmatx, hdma_tx);
     
   /* Configure the DMA handler for Transmission process */
-  hdma_rx.Instance                 = USARTx_RX_DMA_STREAM;
+  /*hdma_rx.Instance                 = USARTx_RX_DMA_STREAM;
   
   hdma_rx.Init.Channel             = USARTx_RX_DMA_CHANNEL;
   hdma_rx.Init.Direction           = DMA_PERIPH_TO_MEMORY;
@@ -148,22 +148,22 @@ void HAL_UART_MspInit(UART_HandleTypeDef *huart)
   hdma_rx.Init.MemBurst            = DMA_MBURST_INC4;
   hdma_rx.Init.PeriphBurst         = DMA_PBURST_INC4; 
 
-  HAL_DMA_Init(&hdma_rx);
+  HAL_DMA_Init(&hdma_rx);*/
     
   /* Associate the initialized DMA handle to the the UART handle */
-  __HAL_LINKDMA(huart, hdmarx, hdma_rx);
+  //__HAL_LINKDMA(huart, hdmarx, hdma_rx);
     
   /*##-4- Configure the NVIC for DMA #########################################*/
   /* NVIC configuration for DMA transfer complete interrupt (USARTx_TX) */
-  HAL_NVIC_SetPriority(USARTx_DMA_TX_IRQn, 2, 1);
-  HAL_NVIC_EnableIRQ(USARTx_DMA_TX_IRQn);
+  //HAL_NVIC_SetPriority(USARTx_DMA_TX_IRQn, 0, 1);
+  //HAL_NVIC_EnableIRQ(USARTx_DMA_TX_IRQn);
     
   /* NVIC configuration for DMA transfer complete interrupt (USARTx_RX) */
-  HAL_NVIC_SetPriority(USARTx_DMA_RX_IRQn, 2, 0);   
-  HAL_NVIC_EnableIRQ(USARTx_DMA_RX_IRQn);
+  //HAL_NVIC_SetPriority(USARTx_DMA_RX_IRQn, 0, 0);   
+  //HAL_NVIC_EnableIRQ(USARTx_DMA_RX_IRQn);
   
   /* NVIC configuration for USART TC interrupt */
-  HAL_NVIC_SetPriority(USARTx_IRQn, 0, 0);
+  HAL_NVIC_SetPriority(USARTx_IRQn, 0, 1);
   HAL_NVIC_EnableIRQ(USARTx_IRQn);
 }
 
@@ -178,8 +178,8 @@ void HAL_UART_MspInit(UART_HandleTypeDef *huart)
 void HAL_UART_MspDeInit(UART_HandleTypeDef *huart)
 {
   
-  static DMA_HandleTypeDef hdma_tx;
-  static DMA_HandleTypeDef hdma_rx;
+  //static DMA_HandleTypeDef hdma_tx;
+  //static DMA_HandleTypeDef hdma_rx;
 
   /*##-1- Reset peripherals ##################################################*/
   USARTx_FORCE_RESET();
@@ -193,13 +193,14 @@ void HAL_UART_MspDeInit(UART_HandleTypeDef *huart)
    
   /*##-3- Disable the DMA Streams ############################################*/
   /* De-Initialize the DMA Stream associate to transmission process */
-  HAL_DMA_DeInit(&hdma_tx); 
+  //HAL_DMA_DeInit(&hdma_tx); 
   /* De-Initialize the DMA Stream associate to reception process */
-  HAL_DMA_DeInit(&hdma_rx);
+  //HAL_DMA_DeInit(&hdma_rx);
   
   /*##-4- Disable the NVIC for DMA ###########################################*/
-  HAL_NVIC_DisableIRQ(USARTx_DMA_TX_IRQn);
-  HAL_NVIC_DisableIRQ(USARTx_DMA_RX_IRQn);
+  //HAL_NVIC_DisableIRQ(USARTx_DMA_TX_IRQn);
+  //HAL_NVIC_DisableIRQ(USARTx_DMA_RX_IRQn);
+  HAL_NVIC_DisableIRQ(USARTx_IRQn);
 }
 
 /**
