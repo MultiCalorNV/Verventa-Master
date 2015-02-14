@@ -94,6 +94,11 @@ static uint8_t FT6206_read_register(uint8_t reg){
 	return return_val;
 }
 
+/**
+ * @brief FT6206_write_register
+ * @param register to write to
+ * @param data to write to
+ */
 static uint8_t FT6206_write_register(uint8_t reg, uint8_t data){
 	uint8_t return_val = 0;
 	
